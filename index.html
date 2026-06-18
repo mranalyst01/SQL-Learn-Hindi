@@ -1,0 +1,1153 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SQL Practice — Hindi</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Sora:wght@300;400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e1a;
+    --surface: #111827;
+    --card: #1a2235;
+    --border: #2a3a55;
+    --accent: #00d4ff;
+    --accent2: #7c3aed;
+    --accent3: #10b981;
+    --warn: #f59e0b;
+    --danger: #ef4444;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --code-bg: #0d1117;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Sora', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  /* Background grid */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: 
+      linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* HEADER */
+  header {
+    position: relative;
+    z-index: 10;
+    padding: 24px 32px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(10,14,26,0.9);
+    backdrop-filter: blur(12px);
+    position: sticky;
+    top: 0;
+  }
+  .logo {
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+  }
+  .logo span { color: var(--accent); }
+  .subtitle { color: var(--muted); font-size: 13px; margin-left: auto; }
+  .progress-bar-wrap {
+    display: flex; align-items: center; gap: 10px; margin-left: auto;
+  }
+  .progress-text { font-size: 12px; color: var(--accent); font-family: 'JetBrains Mono'; }
+  .progress-track {
+    width: 120px; height: 4px; background: var(--border); border-radius: 2px; overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2));
+    transition: width 0.5s ease; border-radius: 2px;
+  }
+
+  /* LAYOUT */
+  .layout {
+    display: flex;
+    min-height: calc(100vh - 73px);
+    position: relative;
+    z-index: 1;
+  }
+
+  /* SIDEBAR */
+  .sidebar {
+    width: 280px;
+    min-width: 280px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    padding: 20px 0;
+  }
+  .sidebar-title {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 0 20px 12px;
+  }
+  .topic-btn {
+    width: 100%;
+    text-align: left;
+    padding: 12px 20px;
+    background: none;
+    border: none;
+    color: var(--text);
+    cursor: pointer;
+    font-family: 'Sora', sans-serif;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.2s;
+    border-left: 3px solid transparent;
+  }
+  .topic-btn:hover { background: rgba(0,212,255,0.06); color: var(--accent); }
+  .topic-btn.active {
+    background: rgba(0,212,255,0.1);
+    border-left-color: var(--accent);
+    color: var(--accent);
+    font-weight: 600;
+  }
+  .topic-num {
+    font-family: 'JetBrains Mono';
+    font-size: 10px;
+    color: var(--muted);
+    min-width: 20px;
+  }
+  .topic-btn.done .topic-num::after { content: ' ✓'; color: var(--accent3); }
+
+  /* MAIN */
+  .main {
+    flex: 1;
+    overflow-y: auto;
+    padding: 40px;
+  }
+
+  /* SECTION TABS */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 32px;
+    background: var(--surface);
+    padding: 4px;
+    border-radius: 12px;
+    width: fit-content;
+    border: 1px solid var(--border);
+  }
+  .tab-btn {
+    padding: 8px 20px;
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-family: 'Sora', sans-serif;
+    font-size: 13px;
+    border-radius: 8px;
+    transition: all 0.2s;
+    font-weight: 500;
+  }
+  .tab-btn.active {
+    background: var(--card);
+    color: var(--accent);
+    border: 1px solid var(--border);
+  }
+  .tab-btn:hover:not(.active) { color: var(--text); }
+
+  /* CONTENT PANELS */
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* TOPIC HEADER */
+  .topic-header {
+    margin-bottom: 28px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border);
+  }
+  .topic-tag {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent);
+    background: rgba(0,212,255,0.1);
+    border: 1px solid rgba(0,212,255,0.2);
+    padding: 4px 10px;
+    border-radius: 4px;
+    margin-bottom: 12px;
+  }
+  .topic-title {
+    font-size: 32px;
+    font-weight: 800;
+    letter-spacing: -1px;
+    margin-bottom: 8px;
+  }
+  .topic-title span { color: var(--accent); }
+
+  /* DEFINITION CARD */
+  .def-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 24px;
+    margin-bottom: 24px;
+    position: relative;
+    overflow: hidden;
+  }
+  .def-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+  }
+  .def-card h3 {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--accent);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .def-card p { line-height: 1.8; color: var(--text); font-size: 14px; }
+
+  /* CODE BLOCK */
+  .code-block {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin: 16px 0;
+    font-family: 'JetBrains Mono';
+    font-size: 13px;
+    line-height: 1.7;
+    overflow-x: auto;
+    position: relative;
+  }
+  .code-block .kw { color: #ff79c6; }
+  .code-block .fn { color: #50fa7b; }
+  .code-block .str { color: #f1fa8c; }
+  .code-block .cm { color: #6272a4; }
+  .code-block .tbl { color: #8be9fd; }
+  .code-block .num { color: #bd93f9; }
+  .code-label {
+    font-size: 10px;
+    color: var(--muted);
+    font-family: 'Sora';
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  /* EXAMPLES */
+  .examples-grid {
+    display: grid;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .example-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    transition: border-color 0.2s;
+  }
+  .example-card:hover { border-color: var(--accent); }
+  .example-num {
+    font-family: 'JetBrains Mono';
+    font-size: 11px;
+    color: var(--accent2);
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .example-title {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: var(--text);
+  }
+  .example-desc { font-size: 13px; color: var(--muted); margin-bottom: 12px; line-height: 1.6; }
+
+  /* PRACTICE SECTION */
+  .practice-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+  }
+  .practice-title { font-size: 20px; font-weight: 700; }
+  .score-badge {
+    background: rgba(16,185,129,0.1);
+    border: 1px solid rgba(16,185,129,0.3);
+    color: var(--accent3);
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-family: 'JetBrains Mono';
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .q-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 24px;
+    margin-bottom: 16px;
+    transition: all 0.3s;
+  }
+  .q-card.answered-correct { border-color: var(--accent3); background: rgba(16,185,129,0.05); }
+  .q-card.answered-wrong { border-color: var(--danger); background: rgba(239,68,68,0.05); }
+  .q-num {
+    font-family: 'JetBrains Mono';
+    font-size: 11px;
+    color: var(--accent);
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+  .q-text { font-size: 14px; line-height: 1.7; margin-bottom: 16px; font-weight: 500; }
+  .q-options { display: grid; gap: 8px; }
+  .opt-btn {
+    text-align: left;
+    padding: 12px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    cursor: pointer;
+    font-family: 'Sora', sans-serif;
+    font-size: 13px;
+    transition: all 0.2s;
+    font-family: 'JetBrains Mono';
+  }
+  .opt-btn:hover:not(:disabled) { border-color: var(--accent); background: rgba(0,212,255,0.05); color: var(--accent); }
+  .opt-btn:disabled { cursor: default; }
+  .opt-btn.correct { border-color: var(--accent3); background: rgba(16,185,129,0.15); color: var(--accent3); }
+  .opt-btn.wrong { border-color: var(--danger); background: rgba(239,68,68,0.1); color: var(--danger); }
+  .q-explanation {
+    margin-top: 14px;
+    padding: 14px;
+    background: rgba(0,212,255,0.05);
+    border: 1px solid rgba(0,212,255,0.15);
+    border-radius: 8px;
+    font-size: 13px;
+    line-height: 1.7;
+    color: var(--text);
+    display: none;
+  }
+  .q-explanation.show { display: block; }
+  .exp-label { color: var(--accent); font-weight: 600; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; }
+
+  .reset-btn {
+    margin-top: 24px;
+    padding: 12px 28px;
+    background: linear-gradient(135deg, var(--accent2), var(--accent));
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-family: 'Sora', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+  .reset-btn:hover { opacity: 0.85; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  @media (max-width: 768px) {
+    .sidebar { display: none; }
+    .main { padding: 20px; }
+    .topic-title { font-size: 22px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">SQL <span>सीखो</span></div>
+  <div class="progress-bar-wrap">
+    <span class="progress-text" id="progressText">0 / 11</span>
+    <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+  </div>
+</header>
+
+<div class="layout">
+  <div class="sidebar">
+    <div class="sidebar-title">SQL Topics</div>
+    <div id="topicList"></div>
+  </div>
+  <div class="main" id="mainContent"></div>
+</div>
+
+<script>
+const topics = [
+  {
+    id: 0,
+    name: "SELECT & FROM",
+    tag: "BASIC",
+    definition: "SELECT statement SQL का सबसे basic और important command है। इसका उपयोग database की table से data को retrieve (निकालने) के लिए किया जाता है। FROM keyword यह बताता है कि data किस table से लेना है।",
+    syntax: `<span class="kw">SELECT</span> column1, column2, ...
+<span class="kw">FROM</span> table_name;
+
+<span class="cm">-- सभी columns लेने के लिए:</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> table_name;`,
+    examples: [
+      {
+        title: "सभी data निकालना",
+        desc: "Students table से सभी records लाओ",
+        code: `<span class="kw">SELECT</span> * <span class="kw">FROM</span> <span class="tbl">students</span>;`
+      },
+      {
+        title: "Specific columns",
+        desc: "सिर्फ नाम और उम्र लाओ",
+        code: `<span class="kw">SELECT</span> name, age <span class="kw">FROM</span> <span class="tbl">students</span>;`
+      },
+      {
+        title: "Column Alias",
+        desc: "Column का नाम बदलकर दिखाओ",
+        code: `<span class="kw">SELECT</span> name <span class="kw">AS</span> <span class="str">'Student Name'</span>, age <span class="kw">AS</span> <span class="str">'Age'</span>
+<span class="kw">FROM</span> <span class="tbl">students</span>;`
+      }
+    ],
+    questions: [
+      { q: "SELECT * FROM employees; — इसमें * का मतलब क्या है?", options: ["सिर्फ पहला column", "सभी columns", "सिर्फ numeric columns", "कोई column नहीं"], correct: 1, exp: "* (asterisk) का मतलब है सभी columns। यह table के हर column का data return करता है।" },
+      { q: "Employees table से सिर्फ 'name' column निकालने के लिए सही query कौन सी है?", options: ["FROM employees SELECT name", "SELECT name FROM employees", "GET name FROM employees", "FETCH name FROM employees"], correct: 1, exp: "SQL में सही syntax है: SELECT column_name FROM table_name; इसलिए SELECT name FROM employees; सही है।" },
+      { q: "SELECT statement का मुख्य काम क्या है?", options: ["Data delete करना", "Data insert करना", "Data retrieve करना", "Table बनाना"], correct: 2, exp: "SELECT का काम database से data को retrieve (निकालना) करना है। यह data को modify नहीं करता।" },
+      { q: "SELECT name AS 'Employee Name' में AS keyword का क्या काम है?", options: ["Table का नाम बदलता है", "Column को alias (नया नाम) देता है", "Filter लगाता है", "Sort करता है"], correct: 1, exp: "AS keyword column या table को temporary alias (उपनाम) देने के लिए use होता है। Output में column का नाम बदल जाता है।" },
+      { q: "क्या एक SELECT query में एक से ज्यादा columns select कर सकते हैं?", options: ["नहीं, सिर्फ एक", "हाँ, comma से separate करके", "हाँ, AND से", "हाँ, OR से"], correct: 1, exp: "हाँ! SELECT col1, col2, col3 FROM table; — columns को comma (,) से separate करके multiple columns select कर सकते हैं।" },
+      { q: "निम्नलिखित में से कौन सा FROM का सही use है?", options: ["SELECT name students FROM", "FROM students SELECT name", "SELECT name FROM students", "SELECT FROM name students"], correct: 2, exp: "SQL का syntax है: SELECT columns FROM table_name; — FROM हमेशा table name से पहले आता है।" },
+      { q: "SELECT DISTINCT name FROM students; — DISTINCT का क्या मतलब है?", options: ["सभी records", "सिर्फ duplicate records", "बिना duplicate के unique records", "Sorted records"], correct: 2, exp: "DISTINCT keyword duplicate values को हटाकर unique values ही दिखाता है।" },
+      { q: "SQL में query के अंत में क्या लगाते हैं?", options: [". (dot)", ", (comma)", "; (semicolon)", "! (exclamation)"], correct: 2, exp: "SQL statements के अंत में semicolon (;) लगाया जाता है। यह query के end को indicate करता है।" },
+      { q: "SELECT 5 * 10; का output क्या होगा?", options: ["Error", "510", "50", "5*10"], correct: 2, exp: "SELECT सिर्फ table से नहीं, expressions और calculations भी evaluate कर सकता है। 5*10 = 50 output आएगा।" },
+      { q: "एक table में 5 columns हैं। SELECT * लिखने पर कितने columns आएंगे?", options: ["1", "3", "5", "0"], correct: 2, exp: "SELECT * सभी columns return करता है। 5 columns वाली table में SELECT * से 5 columns आएंगे।" }
+    ]
+  },
+  {
+    id: 1,
+    name: "WHERE Clause",
+    tag: "FILTERING",
+    definition: "WHERE clause का उपयोग query में condition लगाने के लिए किया जाता है। यह सिर्फ उन्हीं rows को return करता है जो condition को satisfy करती हैं। बिना WHERE के सभी rows आती हैं।",
+    syntax: `<span class="kw">SELECT</span> column1, column2
+<span class="kw">FROM</span> table_name
+<span class="kw">WHERE</span> condition;
+
+<span class="cm">-- Operators: =, !=, >, <, >=, <=</span>
+<span class="cm">-- Logical: AND, OR, NOT</span>`,
+    examples: [
+      {
+        title: "Equal condition",
+        desc: "Age 20 वाले students",
+        code: `<span class="kw">SELECT</span> * <span class="kw">FROM</span> <span class="tbl">students</span>
+<span class="kw">WHERE</span> age = <span class="num">20</span>;`
+      },
+      {
+        title: "Multiple conditions (AND)",
+        desc: "Age > 18 AND city = 'Delhi'",
+        code: `<span class="kw">SELECT</span> name <span class="kw">FROM</span> <span class="tbl">students</span>
+<span class="kw">WHERE</span> age > <span class="num">18</span> <span class="kw">AND</span> city = <span class="str">'Delhi'</span>;`
+      },
+      {
+        title: "OR condition",
+        desc: "Mumbai या Chennai के students",
+        code: `<span class="kw">SELECT</span> * <span class="kw">FROM</span> <span class="tbl">students</span>
+<span class="kw">WHERE</span> city = <span class="str">'Mumbai'</span> <span class="kw">OR</span> city = <span class="str">'Chennai'</span>;`
+      }
+    ],
+    questions: [
+      { q: "WHERE clause का मुख्य उद्देश्य क्या है?", options: ["Columns sort करना", "Rows filter करना", "Table create करना", "Data insert करना"], correct: 1, exp: "WHERE clause rows को filter करने के लिए use होता है — सिर्फ वही rows आती हैं जो condition को satisfy करती हैं।" },
+      { q: "SELECT * FROM emp WHERE salary > 50000; — यह क्या करेगा?", options: ["50000 से कम salary वाले", "50000 salary वाले", "50000 से ज्यादा salary वाले", "सभी employees"], correct: 2, exp: "> operator 'greater than' है। salary > 50000 का मतलब 50000 से ज्यादा salary वाले employees।" },
+      { q: "WHERE name = 'Rahul' AND age = 25 — दोनों conditions का क्या होगा?", options: ["कोई एक condition true होनी चाहिए", "दोनों conditions true होनी चाहिए", "दोनों false होनी चाहिए", "कोई भी true हो"], correct: 1, exp: "AND operator में दोनों conditions का true होना जरूरी है। तभी row return होगी।" },
+      { q: "String values को WHERE में कैसे लिखते हैं?", options: ["WHERE name = Rahul", "WHERE name = [Rahul]", "WHERE name = 'Rahul'", "WHERE name == Rahul"], correct: 2, exp: "String (text) values को single quotes ('') में लिखा जाता है। जैसे: WHERE name = 'Rahul';" },
+      { q: "WHERE age != 25 का मतलब क्या है?", options: ["Age 25 वाले", "Age 25 नहीं वाले", "Age 25 से ज्यादा", "Age 25 से कम"], correct: 1, exp: "!= operator 'not equal to' है। age != 25 का मतलब जिनकी age 25 नहीं है।" },
+      { q: "OR operator कब true होता है?", options: ["जब दोनों conditions false हों", "जब कम से कम एक condition true हो", "जब दोनों conditions true हों", "कभी नहीं"], correct: 1, exp: "OR operator में कम से कम एक condition का true होना काफी है। A OR B — अगर A या B में से कोई एक true है तो result true।" },
+      { q: "WHERE clause SELECT query में कहाँ आता है?", options: ["SELECT के पहले", "FROM के पहले", "FROM के बाद", "कहीं भी"], correct: 2, exp: "SQL का order है: SELECT → FROM → WHERE। इसलिए WHERE हमेशा FROM के बाद लिखते हैं।" },
+      { q: "NOT operator का काम क्या है?", options: ["Condition को reverse करता है", "Values add करता है", "Sort करता है", "Duplicate हटाता है"], correct: 0, exp: "NOT operator condition को negate (उल्टा) करता है। WHERE NOT age = 20 का मतलब जिनकी age 20 नहीं है।" },
+      { q: "BETWEEN operator का use क्या है?", options: ["दो values के बीच check करने के लिए", "NULL check करने के लिए", "String compare के लिए", "Sort के लिए"], correct: 0, exp: "BETWEEN range check करता है: WHERE age BETWEEN 18 AND 25 — 18 से 25 के बीच की age।" },
+      { q: "WHERE salary >= 30000 में >= का मतलब?", options: ["सिर्फ 30000", "30000 से कम", "30000 या उससे ज्यादा", "30000 से ज्यादा"], correct: 2, exp: ">= का मतलब 'greater than or equal to' — 30000 और उससे ज्यादा। 30000 भी include होगा।" }
+    ]
+  },
+  {
+    id: 2,
+    name: "ORDER BY",
+    tag: "SORTING",
+    definition: "ORDER BY clause का उपयोग query के result को sort (क्रम में लगाने) के लिए किया जाता है। Default sorting ascending (A→Z, 1→9) होती है। DESC keyword से descending (Z→A, 9→1) order में sort कर सकते हैं।",
+    syntax: `<span class="kw">SELECT</span> column1, column2
+<span class="kw">FROM</span> table_name
+<span class="kw">ORDER BY</span> column1 <span class="kw">ASC</span>;   <span class="cm">-- ascending (default)</span>
+
+<span class="kw">ORDER BY</span> column1 <span class="kw">DESC</span>;  <span class="cm">-- descending</span>
+<span class="kw">ORDER BY</span> col1 <span class="kw">ASC</span>, col2 <span class="kw">DESC</span>; <span class="cm">-- multiple</span>`,
+    examples: [
+      {
+        title: "Salary से sort",
+        desc: "सबसे ज्यादा salary पहले",
+        code: `<span class="kw">SELECT</span> name, salary <span class="kw">FROM</span> <span class="tbl">employees</span>
+<span class="kw">ORDER BY</span> salary <span class="kw">DESC</span>;`
+      },
+      {
+        title: "Name alphabetically",
+        desc: "नाम A से Z क्रम में",
+        code: `<span class="kw">SELECT</span> * <span class="kw">FROM</span> <span class="tbl">students</span>
+<span class="kw">ORDER BY</span> name <span class="kw">ASC</span>;`
+      },
+      {
+        title: "Multiple columns sort",
+        desc: "पहले department, फिर salary",
+        code: `<span class="kw">SELECT</span> * <span class="kw">FROM</span> <span class="tbl">employees</span>
+<span class="kw">ORDER BY</span> department <span class="kw">ASC</span>, salary <span class="kw">DESC</span>;`
+      }
+    ],
+    questions: [
+      { q: "ORDER BY का default order क्या है?", options: ["Descending", "Random", "Ascending", "Alphabetical"], correct: 2, exp: "ORDER BY का default order Ascending (ASC) है — smallest से largest, A से Z।" },
+      { q: "Salary descending order में sort करने की query?", options: ["ORDER BY salary ASC", "ORDER BY salary UP", "ORDER BY salary DESC", "SORT BY salary DESC"], correct: 2, exp: "DESC keyword descending order के लिए use होता है: ORDER BY salary DESC;" },
+      { q: "ORDER BY query में कहाँ आता है?", options: ["SELECT के पहले", "FROM के पहले", "WHERE के पहले", "Query के अंत में"], correct: 3, exp: "Order of clauses: SELECT → FROM → WHERE → ORDER BY। ORDER BY हमेशा query के अंत में आता है।" },
+      { q: "ORDER BY name; — यह कैसे sort करेगा?", options: ["Z से A", "A से Z (alphabetically)", "Random", "Number के हिसाब से"], correct: 1, exp: "Default ASC order में text A से Z alphabetically sort होता है।" },
+      { q: "क्या एक query में दो columns से sort कर सकते हैं?", options: ["नहीं, सिर्फ एक", "हाँ, comma से", "हाँ, AND से", "नहीं"], correct: 1, exp: "हाँ! ORDER BY col1 ASC, col2 DESC; — comma से multiple columns sort होती हैं।" },
+      { q: "ORDER BY 2; का क्या मतलब है?", options: ["2 rows sort करो", "2nd column से sort करो", "2 से बड़े sort करो", "Error आएगा"], correct: 1, exp: "ORDER BY column number भी accept करता है। ORDER BY 2 का मतलब SELECT में 2nd column से sort करो।" },
+      { q: "Descending order में numbers कैसे आएंगे?", options: ["1, 2, 3, 4", "4, 3, 2, 1", "Random", "0 से शुरू"], correct: 1, exp: "DESC (descending) में बड़े नंबर पहले आते हैं: 100, 50, 25, 10 जैसे।" },
+      { q: "WHERE और ORDER BY दोनों हों तो order क्या होगा?", options: ["ORDER BY पहले, WHERE बाद", "WHERE पहले, ORDER BY बाद", "कोई भी order", "दोनों साथ"], correct: 1, exp: "Correct order: SELECT → FROM → WHERE → ORDER BY। WHERE पहले filter करता है, फिर ORDER BY sort करता है।" },
+      { q: "NULL values ORDER BY ASC में कहाँ आती हैं?", options: ["बीच में", "अंत में (ज्यादातर databases में)", "पहले (ज्यादातर databases में)", "Error"], correct: 2, exp: "ज्यादातर databases (MySQL, PostgreSQL) में NULL values ASC order में पहले या अंत में आती हैं — database पर depend करता है।" },
+      { q: "ORDER BY के बिना SELECT query का output कैसा होगा?", options: ["A-Z sorted", "Z-A sorted", "Guaranteed order नहीं", "Error"], correct: 2, exp: "बिना ORDER BY के rows किसी भी order में आ सकती हैं — कोई guaranteed order नहीं होता।" }
+    ]
+  },
+  {
+    id: 3,
+    name: "GROUP BY & Aggregate Functions",
+    tag: "GROUPING",
+    definition: "GROUP BY clause rows को groups में divide करता है। Aggregate functions (COUNT, SUM, AVG, MAX, MIN) इन groups पर calculations करते हैं। HAVING clause groups को filter करता है (WHERE rows filter करता है, HAVING groups filter करता है)।",
+    syntax: `<span class="kw">SELECT</span> column, <span class="fn">COUNT</span>(*), <span class="fn">SUM</span>(salary)
+<span class="kw">FROM</span> table_name
+<span class="kw">GROUP BY</span> column
+<span class="kw">HAVING</span> <span class="fn">COUNT</span>(*) > <span class="num">5</span>;
+
+<span class="cm">-- Functions: COUNT, SUM, AVG, MAX, MIN</span>`,
+    examples: [
+      {
+        title: "Department-wise count",
+        desc: "हर department में कितने employees",
+        code: `<span class="kw">SELECT</span> department, <span class="fn">COUNT</span>(*) <span class="kw">AS</span> total
+<span class="kw">FROM</span> <span class="tbl">employees</span>
+<span class="kw">GROUP BY</span> department;`
+      },
+      {
+        title: "Average salary",
+        desc: "हर department की average salary",
+        code: `<span class="kw">SELECT</span> dept, <span class="fn">AVG</span>(salary) <span class="kw">AS</span> avg_sal
+<span class="kw">FROM</span> <span class="tbl">employees</span>
+<span class="kw">GROUP BY</span> dept;`
+      },
+      {
+        title: "HAVING filter",
+        desc: "5 से ज्यादा employees वाले departments",
+        code: `<span class="kw">SELECT</span> dept, <span class="fn">COUNT</span>(*) <span class="kw">AS</span> cnt
+<span class="kw">FROM</span> <span class="tbl">employees</span>
+<span class="kw">GROUP BY</span> dept
+<span class="kw">HAVING</span> <span class="fn">COUNT</span>(*) > <span class="num">5</span>;`
+      }
+    ],
+    questions: [
+      { q: "GROUP BY क्या करता है?", options: ["Rows sort करता है", "Rows को groups में divide करता है", "Rows delete करता है", "Columns filter करता है"], correct: 1, exp: "GROUP BY same value वाली rows को एक group में रखता है, फिर हर group पर aggregate function apply होता है।" },
+      { q: "COUNT(*) क्या count करता है?", options: ["सिर्फ NULL values", "सिर्फ numeric values", "सभी rows (NULL सहित)", "Unique values"], correct: 2, exp: "COUNT(*) सभी rows count करता है, चाहे NULL हो या कोई भी value। COUNT(column) NULL को skip करता है।" },
+      { q: "SUM(salary) क्या करता है?", options: ["सबसे बड़ी salary", "सबसे छोटी salary", "सभी salary का total", "Average salary"], correct: 2, exp: "SUM() function सभी values का total (जोड़) निकालता है।" },
+      { q: "AVG(age) क्या return करेगा?", options: ["Maximum age", "Minimum age", "सभी ages का औसत", "Total age"], correct: 2, exp: "AVG() function arithmetic mean (औसत) निकालता है।" },
+      { q: "WHERE और HAVING में क्या फर्क है?", options: ["कोई फर्क नहीं", "WHERE groups filter करता है, HAVING rows", "WHERE rows filter करता है, HAVING groups", "दोनों same काम करते हैं"], correct: 2, exp: "WHERE individual rows को GROUP BY से पहले filter करता है। HAVING groups को GROUP BY के बाद filter करता है।" },
+      { q: "MAX(salary) क्या देगा?", options: ["Average salary", "Minimum salary", "Total salary", "सबसे बड़ी salary"], correct: 3, exp: "MAX() function सबसे बड़ी (maximum) value return करता है।" },
+      { q: "GROUP BY के साथ SELECT में क्या होना चाहिए?", options: ["कोई भी column", "सिर्फ aggregate functions", "Grouped column या aggregate function", "सिर्फ *"], correct: 2, exp: "SELECT में या तो वो column होने चाहिए जो GROUP BY में हैं, या aggregate functions (COUNT, SUM, etc)।" },
+      { q: "HAVING COUNT(*) > 10 — यह क्या करेगा?", options: ["10 से कम rows वाले groups", "10 से ज्यादा rows वाले groups", "सिर्फ 10 rows वाले groups", "सभी groups"], correct: 1, exp: "HAVING COUNT(*) > 10 सिर्फ उन groups को रखेगा जिनमें 10 से ज्यादा rows हैं।" },
+      { q: "MIN(price) क्या return करेगा?", options: ["सबसे महंगी price", "सबसे सस्ती price", "Average price", "Total price"], correct: 1, exp: "MIN() function सबसे छोटी (minimum) value return करता है।" },
+      { q: "Clauses का सही order क्या है?", options: ["GROUP BY → WHERE → HAVING", "WHERE → GROUP BY → HAVING", "HAVING → WHERE → GROUP BY", "WHERE → HAVING → GROUP BY"], correct: 1, exp: "Correct order: SELECT → FROM → WHERE → GROUP BY → HAVING → ORDER BY।" }
+    ]
+  },
+  {
+    id: 4,
+    name: "JOINS",
+    tag: "INTERMEDIATE",
+    definition: "JOIN का उपयोग दो या दो से अधिक tables को एक साथ combine करने के लिए किया जाता है। Common column (key) की help से tables को जोड़ा जाता है। Types: INNER JOIN (matching rows), LEFT JOIN (left table सभी rows), RIGHT JOIN, FULL JOIN।",
+    syntax: `<span class="cm">-- INNER JOIN (सिर्फ matching rows)</span>
+<span class="kw">SELECT</span> a.col, b.col
+<span class="kw">FROM</span> <span class="tbl">table_a</span> a
+<span class="kw">INNER JOIN</span> <span class="tbl">table_b</span> b
+<span class="kw">ON</span> a.id = b.a_id;
+
+<span class="cm">-- LEFT JOIN (left table सभी)</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> <span class="tbl">table_a</span>
+<span class="kw">LEFT JOIN</span> <span class="tbl">table_b</span> <span class="kw">ON</span> a.id = b.id;`,
+    examples: [
+      {
+        title: "INNER JOIN",
+        desc: "Students और Marks tables combine करो",
+        code: `<span class="kw">SELECT</span> s.name, m.marks
+<span class="kw">FROM</span> <span class="tbl">students</span> s
+<span class="kw">INNER JOIN</span> <span class="tbl">marks</span> m
+<span class="kw">ON</span> s.id = m.student_id;`
+      },
+      {
+        title: "LEFT JOIN",
+        desc: "सभी students, चाहे marks हों या न हों",
+        code: `<span class="kw">SELECT</span> s.name, m.marks
+<span class="kw">FROM</span> <span class="tbl">students</span> s
+<span class="kw">LEFT JOIN</span> <span class="tbl">marks</span> m
+<span class="kw">ON</span> s.id = m.student_id;`
+      },
+      {
+        title: "Multiple tables JOIN",
+        desc: "3 tables एक साथ join करो",
+        code: `<span class="kw">SELECT</span> s.name, m.marks, c.course_name
+<span class="kw">FROM</span> <span class="tbl">students</span> s
+<span class="kw">JOIN</span> <span class="tbl">marks</span> m <span class="kw">ON</span> s.id = m.sid
+<span class="kw">JOIN</span> <span class="tbl">courses</span> c <span class="kw">ON</span> m.course_id = c.id;`
+      }
+    ],
+    questions: [
+      { q: "INNER JOIN क्या return करता है?", options: ["Left table की सभी rows", "Right table की सभी rows", "दोनों tables की matching rows", "सभी rows"], correct: 2, exp: "INNER JOIN सिर्फ वो rows return करता है जहाँ दोनों tables में matching value होती है।" },
+      { q: "LEFT JOIN में left table की unmatched rows का क्या होता है?", options: ["Delete हो जाती हैं", "NULL के साथ आती हैं", "Error आता है", "Skip हो जाती हैं"], correct: 1, exp: "LEFT JOIN में left table की सभी rows आती हैं। जिनका right table में match नहीं, उनके right columns NULL आते हैं।" },
+      { q: "JOIN में ON clause का काम क्या है?", options: ["Filter करना", "Tables को sort करना", "Join condition specify करना", "Columns select करना"], correct: 2, exp: "ON clause बताता है कि दोनों tables को किस column के basis पर जोड़ना है।" },
+      { q: "Students table में 5 rows हैं, Marks में 3 matching हैं। INNER JOIN से कितनी rows?", options: ["5", "3", "8", "15"], correct: 1, exp: "INNER JOIN सिर्फ matching rows देता है। 3 matching rows हैं, इसलिए 3 rows आएंगी।" },
+      { q: "SELF JOIN क्या होता है?", options: ["Table का खुद से join", "दो अलग tables का join", "3 tables का join", "No join"], correct: 0, exp: "SELF JOIN में एक table को खुद से ही join किया जाता है। जैसे employees और manager एक ही table में हों।" },
+      { q: "FULL OUTER JOIN क्या return करता है?", options: ["सिर्फ matching rows", "Left table की सभी rows", "Right table की सभी rows", "दोनों tables की सभी rows (matched और unmatched)"], correct: 3, exp: "FULL OUTER JOIN दोनों tables की सभी rows return करता है। Unmatched rows में NULL आता है।" },
+      { q: "Table alias (s, m) JOIN में क्यों use करते हैं?", options: ["Mandatory है", "Query को short और readable बनाने के लिए", "Performance के लिए", "Error avoid करने के लिए"], correct: 1, exp: "Alias query को छोटा और readable बनाता है। students s लिखने से बार-बार students लिखने की जरूरत नहीं।" },
+      { q: "CROSS JOIN क्या करता है?", options: ["Matching rows", "Cartesian product (हर row का हर row से)", "NULL rows", "Sorted rows"], correct: 1, exp: "CROSS JOIN दोनों tables का Cartesian product देता है — table A की हर row, table B की हर row से combine होती है।" },
+      { q: "ON a.id = b.student_id में क्या हो रहा है?", options: ["Values compare हो रही हैं", "a.id और b.student_id के basis पर tables join हो रही हैं", "Data filter हो रहा है", "Sort हो रहा है"], correct: 1, exp: "ON clause join condition define करता है — यहाँ दोनों tables को id और student_id column के basis पर join किया जा रहा है।" },
+      { q: "RIGHT JOIN में कौन सी table की सभी rows आती हैं?", options: ["Left table", "Right table", "दोनों", "कोई नहीं"], correct: 1, exp: "RIGHT JOIN में right table (दूसरी table जो JOIN के बाद है) की सभी rows आती हैं।" }
+    ]
+  },
+  {
+    id: 5,
+    name: "INSERT, UPDATE, DELETE",
+    tag: "DML",
+    definition: "DML (Data Manipulation Language) commands data को modify करने के लिए use होते हैं। INSERT नया data add करता है, UPDATE existing data बदलता है, और DELETE data को remove करता है। ये commands database के data को directly affect करती हैं।",
+    syntax: `<span class="cm">-- INSERT</span>
+<span class="kw">INSERT INTO</span> table_name (col1, col2)
+<span class="kw">VALUES</span> (val1, val2);
+
+<span class="cm">-- UPDATE</span>
+<span class="kw">UPDATE</span> table_name
+<span class="kw">SET</span> col1 = val1
+<span class="kw">WHERE</span> condition;
+
+<span class="cm">-- DELETE</span>
+<span class="kw">DELETE FROM</span> table_name
+<span class="kw">WHERE</span> condition;`,
+    examples: [
+      {
+        title: "INSERT — नया student add करो",
+        desc: "Students table में नई row insert करो",
+        code: `<span class="kw">INSERT INTO</span> <span class="tbl">students</span> (name, age, city)
+<span class="kw">VALUES</span> (<span class="str">'Rahul'</span>, <span class="num">21</span>, <span class="str">'Delhi'</span>);`
+      },
+      {
+        title: "UPDATE — salary बढ़ाओ",
+        desc: "ID 5 वाले employee की salary update करो",
+        code: `<span class="kw">UPDATE</span> <span class="tbl">employees</span>
+<span class="kw">SET</span> salary = <span class="num">60000</span>
+<span class="kw">WHERE</span> id = <span class="num">5</span>;`
+      },
+      {
+        title: "DELETE — record हटाओ",
+        desc: "ID 3 वाली row delete करो",
+        code: `<span class="kw">DELETE FROM</span> <span class="tbl">students</span>
+<span class="kw">WHERE</span> id = <span class="num">3</span>;`
+      }
+    ],
+    questions: [
+      { q: "INSERT INTO का क्या काम है?", options: ["Data update करना", "Data delete करना", "नया data add करना", "Table create करना"], correct: 2, exp: "INSERT INTO table में नई rows (records) add करने के लिए use होता है।" },
+      { q: "UPDATE query में WHERE clause क्यों जरूरी है?", options: ["Performance के लिए", "बिना WHERE सभी rows update हो जाती हैं", "Mandatory syntax है", "Sorting के लिए"], correct: 1, exp: "बिना WHERE के UPDATE सभी rows को modify कर देगा! WHERE से specific rows को ही update करते हैं।" },
+      { q: "DELETE FROM students; — यह क्या करेगा?", options: ["Table delete होगी", "सिर्फ पहली row delete होगी", "Table की सभी rows delete होंगी", "Error आएगा"], correct: 2, exp: "बिना WHERE के DELETE सभी rows हटा देता है। Table structure रहती है लेकिन सारा data चला जाता है।" },
+      { q: "Multiple values INSERT करने का syntax?", options: ["INSERT INTO t VALUES (1), VALUES (2)", "INSERT INTO t VALUES (1), (2), (3)", "INSERT MULTIPLE INTO t VALUES 1,2,3", "ADD INTO t VALUES (1)(2)"], correct: 1, exp: "Multiple rows एक साथ insert करने के लिए: INSERT INTO t (col) VALUES (1), (2), (3);" },
+      { q: "UPDATE में SET का काम क्या है?", options: ["Condition define करना", "Column की नई value specify करना", "Table select करना", "Sort करना"], correct: 1, exp: "SET keyword specify करता है कि कौन सा column किस नई value से update होगा।" },
+      { q: "TRUNCATE और DELETE में क्या फर्क है?", options: ["कोई फर्क नहीं", "TRUNCATE सभी rows हटाता है और faster है, rollback मुश्किल", "DELETE faster है", "TRUNCATE WHERE support करता है"], correct: 1, exp: "TRUNCATE सभी rows quickly हटाता है (rollback नहीं हो सकता ज्यादातर cases में)। DELETE धीमा है पर WHERE और rollback support करता है।" },
+      { q: "INSERT में columns specify न करें तो क्या होगा?", options: ["Error", "हर column के लिए value देनी होगी", "Automatic fill होगा", "NULL insert होगा"], correct: 1, exp: "Columns specify न करने पर VALUES में table के हर column के लिए value देनी होगी, same order में।" },
+      { q: "UPDATE employees SET dept='HR', salary=50000 WHERE id=1; — कितने columns update होंगे?", options: ["1", "2", "3", "0"], correct: 1, exp: "SET में comma-separated columns होते हैं। यहाँ dept और salary — 2 columns एक साथ update होंगे।" },
+      { q: "DML का full form क्या है?", options: ["Data Make Language", "Data Manipulation Language", "Database Management Language", "Data Modify Language"], correct: 1, exp: "DML = Data Manipulation Language। INSERT, UPDATE, DELETE DML commands हैं।" },
+      { q: "DELETE से गया data वापस कैसे आएगा?", options: ["UNDO command से", "ROLLBACK (अगर transaction active है)", "RESTORE command से", "वापस नहीं आ सकता"], correct: 1, exp: "ROLLBACK command से DELETE undo हो सकता है, लेकिन सिर्फ तब जब COMMIT नहीं हुआ हो और transaction active हो।" }
+    ]
+  },
+  {
+    id: 6,
+    name: "CREATE, DROP, ALTER",
+    tag: "DDL",
+    definition: "DDL (Data Definition Language) commands database की structure (schema) को define और modify करते हैं। CREATE table/database बनाता है, ALTER table को modify करता है (column add/remove/modify), और DROP table को permanently delete करता है।",
+    syntax: `<span class="cm">-- CREATE TABLE</span>
+<span class="kw">CREATE TABLE</span> <span class="tbl">students</span> (
+  id <span class="fn">INT</span> <span class="kw">PRIMARY KEY</span>,
+  name <span class="fn">VARCHAR</span>(<span class="num">50</span>) <span class="kw">NOT NULL</span>,
+  age <span class="fn">INT</span>
+);
+
+<span class="cm">-- ALTER (column add करो)</span>
+<span class="kw">ALTER TABLE</span> <span class="tbl">students</span>
+<span class="kw">ADD</span> email <span class="fn">VARCHAR</span>(<span class="num">100</span>);
+
+<span class="cm">-- DROP (table delete करो)</span>
+<span class="kw">DROP TABLE</span> <span class="tbl">students</span>;`,
+    examples: [
+      {
+        title: "Table बनाओ",
+        desc: "Employees table create करो",
+        code: `<span class="kw">CREATE TABLE</span> <span class="tbl">employees</span> (
+  id <span class="fn">INT</span> <span class="kw">PRIMARY KEY AUTO_INCREMENT</span>,
+  name <span class="fn">VARCHAR</span>(<span class="num">100</span>) <span class="kw">NOT NULL</span>,
+  salary <span class="fn">DECIMAL</span>(<span class="num">10</span>,<span class="num">2</span>)
+);`
+      },
+      {
+        title: "Column Add करो",
+        desc: "Existing table में नया column",
+        code: `<span class="kw">ALTER TABLE</span> <span class="tbl">employees</span>
+<span class="kw">ADD COLUMN</span> phone <span class="fn">VARCHAR</span>(<span class="num">15</span>);`
+      },
+      {
+        title: "Column Modify करो",
+        desc: "Column का datatype बदलो",
+        code: `<span class="kw">ALTER TABLE</span> <span class="tbl">employees</span>
+<span class="kw">MODIFY</span> name <span class="fn">VARCHAR</span>(<span class="num">200</span>);`
+      }
+    ],
+    questions: [
+      { q: "DDL का full form क्या है?", options: ["Data Delete Language", "Data Definition Language", "Database Design Language", "Data Describe Language"], correct: 1, exp: "DDL = Data Definition Language। CREATE, ALTER, DROP DDL commands हैं।" },
+      { q: "PRIMARY KEY की property क्या होती है?", options: ["NULL हो सकती है", "Duplicate हो सकती है", "Unique और NOT NULL होती है", "Optional होती है"], correct: 2, exp: "PRIMARY KEY हमेशा UNIQUE होती है और NULL नहीं हो सकती। यह हर row को uniquely identify करती है।" },
+      { q: "DROP TABLE और DELETE FROM में क्या फर्क है?", options: ["कोई फर्क नहीं", "DROP पूरी table structure हटाता है, DELETE सिर्फ data", "DELETE table structure हटाता है", "DROP faster है"], correct: 1, exp: "DROP TABLE पूरी table (structure + data) permanently delete करती है। DELETE FROM सिर्फ data rows हटाता है, structure रहती है।" },
+      { q: "NOT NULL constraint का मतलब?", options: ["Value खाली रह सकती है", "Value हमेशा NULL होगी", "Column में NULL value नहीं जा सकती", "Unique values होंगी"], correct: 2, exp: "NOT NULL constraint ensure करता है कि उस column में कोई भी row NULL value नहीं रख सकती।" },
+      { q: "ALTER TABLE से क्या कर सकते हैं?", options: ["सिर्फ column add", "Column add, modify, drop, rename", "सिर्फ table rename", "Data insert"], correct: 1, exp: "ALTER TABLE से column add/drop/modify/rename, constraint add/drop, table rename — सब होता है।" },
+      { q: "AUTO_INCREMENT का क्या काम है?", options: ["Values automatically घटती हैं", "Values automatically बढ़ती हैं (1,2,3...)", "Random values", "Fixed value"], correct: 1, exp: "AUTO_INCREMENT (MySQL) हर new row में automatically incrementing number देता है: 1, 2, 3..." },
+      { q: "VARCHAR(50) में 50 का मतलब?", options: ["50 rows", "Maximum 50 characters", "Minimum 50 characters", "50 bytes exact"], correct: 1, exp: "VARCHAR(50) का मतलब variable-length string जो maximum 50 characters store कर सकती है।" },
+      { q: "Table create करते समय UNIQUE constraint का मतलब?", options: ["Column में duplicate values allowed", "Column में duplicate values नहीं होंगी", "NULL values नहीं होंगी", "Automatic values"], correct: 1, exp: "UNIQUE constraint ensure करता है कि उस column में कोई भी दो rows same value नहीं रख सकतीं।" },
+      { q: "एक table में कितने PRIMARY KEY हो सकते हैं?", options: ["कितने भी", "सिर्फ 2", "सिर्फ 1", "0"], correct: 2, exp: "एक table में सिर्फ एक PRIMARY KEY हो सकती है। हालांकि वो composite हो सकती है (multiple columns मिलकर)।" },
+      { q: "CREATE DATABASE mydb; — यह क्या करेगा?", options: ["Database delete होगा", "Table बनेगी", "mydb नाम का database बनेगा", "Error"], correct: 2, exp: "CREATE DATABASE नया database बनाता है। फिर USE mydb; से उसे select करते हैं।" }
+    ]
+  },
+  {
+    id: 7,
+    name: "Subqueries",
+    tag: "ADVANCED",
+    definition: "Subquery (nested query) एक SQL query के अंदर दूसरी SQL query होती है। Inner query पहले execute होती है और उसका result outer query में use होता है। Subqueries WHERE, FROM, SELECT कहीं भी आ सकती हैं।",
+    syntax: `<span class="cm">-- WHERE में subquery</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> <span class="tbl">employees</span>
+<span class="kw">WHERE</span> salary > (
+  <span class="kw">SELECT</span> <span class="fn">AVG</span>(salary) <span class="kw">FROM</span> <span class="tbl">employees</span>
+);
+
+<span class="cm">-- IN के साथ subquery</span>
+<span class="kw">SELECT</span> name <span class="kw">FROM</span> <span class="tbl">students</span>
+<span class="kw">WHERE</span> id <span class="kw">IN</span> (
+  <span class="kw">SELECT</span> student_id <span class="kw">FROM</span> <span class="tbl">marks</span>
+  <span class="kw">WHERE</span> marks > <span class="num">90</span>
+);`,
+    examples: [
+      {
+        title: "Average से ज्यादा salary",
+        desc: "Average salary से ज्यादा पाने वाले employees",
+        code: `<span class="kw">SELECT</span> name, salary
+<span class="kw">FROM</span> <span class="tbl">employees</span>
+<span class="kw">WHERE</span> salary > (
+  <span class="kw">SELECT</span> <span class="fn">AVG</span>(salary)
+  <span class="kw">FROM</span> <span class="tbl">employees</span>
+);`
+      },
+      {
+        title: "IN के साथ subquery",
+        desc: "90+ marks वाले students के नाम",
+        code: `<span class="kw">SELECT</span> name <span class="kw">FROM</span> <span class="tbl">students</span>
+<span class="kw">WHERE</span> id <span class="kw">IN</span> (
+  <span class="kw">SELECT</span> student_id
+  <span class="kw">FROM</span> <span class="tbl">marks</span>
+  <span class="kw">WHERE</span> score > <span class="num">90</span>
+);`
+      },
+      {
+        title: "FROM में subquery",
+        desc: "Subquery as derived table",
+        code: `<span class="kw">SELECT</span> dept, avg_sal
+<span class="kw">FROM</span> (
+  <span class="kw">SELECT</span> dept, <span class="fn">AVG</span>(salary) avg_sal
+  <span class="kw">FROM</span> <span class="tbl">employees</span>
+  <span class="kw">GROUP BY</span> dept
+) <span class="kw">AS</span> dept_avg;`
+      }
+    ],
+    questions: [
+      { q: "Subquery को और क्या कहते हैं?", options: ["Outer query", "Nested query / Inner query", "Join query", "Complex query"], correct: 1, exp: "Subquery को nested query या inner query भी कहते हैं। यह दूसरी query के अंदर होती है।" },
+      { q: "Subquery कहाँ-कहाँ use हो सकती है?", options: ["सिर्फ WHERE में", "सिर्फ FROM में", "WHERE, FROM, SELECT, HAVING में", "सिर्फ SELECT में"], correct: 2, exp: "Subquery WHERE, FROM, SELECT, HAVING — कहीं भी use हो सकती है।" },
+      { q: "Correlated subquery क्या है?", options: ["Inner query जो outer query पर depend नहीं करती", "Inner query जो outer query की हर row के लिए execute होती है", "Fast subquery", "JOIN का alternative"], correct: 1, exp: "Correlated subquery outer query की प्रत्येक row के लिए execute होती है — outer query के values use करती है।" },
+      { q: "SELECT * FROM emp WHERE salary = (SELECT MAX(salary) FROM emp); — यह क्या करेगा?", options: ["Minimum salary वाले", "Average salary वाले", "Maximum salary वाले", "सभी employees"], correct: 2, exp: "Inner query MAX salary निकालती है, outer query उस salary वाले employee को return करती है।" },
+      { q: "IN operator subquery के साथ क्या करता है?", options: ["Single value compare करता है", "Subquery की list में value check करता है", "NULL check करता है", "Range check करता है"], correct: 1, exp: "IN operator check करता है कि value subquery की returned list में है या नहीं।" },
+      { q: "Scalar subquery क्या होती है?", options: ["Multiple rows return करती है", "सिर्फ एक value (single row, single column) return करती है", "कोई value नहीं", "Table return करती है"], correct: 1, exp: "Scalar subquery exactly एक row और एक column return करती है। जैसे: (SELECT AVG(salary) FROM emp)।" },
+      { q: "EXISTS operator का क्या काम है?", options: ["Count करना", "Check करना कि subquery कोई row return करती है या नहीं", "Values compare करना", "Sort करना"], correct: 1, exp: "EXISTS true return करता है अगर subquery कम से कम एक row return करे, false अगर कोई row न हो।" },
+      { q: "Subquery execute होने का order क्या है?", options: ["Outer query पहले, inner बाद में", "Inner query पहले, outer बाद में", "साथ-साथ", "Random"], correct: 1, exp: "Inner query (subquery) पहले execute होती है, उसका result outer query में use होता है।" },
+      { q: "FROM clause में subquery को क्या कहते हैं?", options: ["Nested table", "Derived table / Inline view", "Virtual table", "Temp table"], correct: 1, exp: "FROM clause में subquery को derived table या inline view कहते हैं। इसे alias देना जरूरी है।" },
+      { q: "NOT IN (subquery) क्या करेगा?", options: ["Subquery की list में value हो", "Subquery की list में value न हो", "NULL values", "सभी values"], correct: 1, exp: "NOT IN subquery की returned list में जो values नहीं हैं उन्हें select करता है।" }
+    ]
+  },
+  {
+    id: 8,
+    name: "Indexes",
+    tag: "PERFORMANCE",
+    definition: "Index database में data को जल्दी find करने के लिए एक data structure है — जैसे किताब का index। बिना index के database पूरी table scan करता है (slow)। Index से specific data जल्दी मिलता है। Trade-off: faster reads, slower writes, extra space।",
+    syntax: `<span class="cm">-- Index बनाओ</span>
+<span class="kw">CREATE INDEX</span> idx_name
+<span class="kw">ON</span> <span class="tbl">students</span> (name);
+
+<span class="cm">-- Unique Index</span>
+<span class="kw">CREATE UNIQUE INDEX</span> idx_email
+<span class="kw">ON</span> <span class="tbl">users</span> (email);
+
+<span class="cm">-- Index delete करो</span>
+<span class="kw">DROP INDEX</span> idx_name;`,
+    examples: [
+      {
+        title: "Simple Index",
+        desc: "Name column पर index बनाओ",
+        code: `<span class="kw">CREATE INDEX</span> idx_student_name
+<span class="kw">ON</span> <span class="tbl">students</span> (name);`
+      },
+      {
+        title: "Composite Index",
+        desc: "Multiple columns पर index",
+        code: `<span class="kw">CREATE INDEX</span> idx_dept_salary
+<span class="kw">ON</span> <span class="tbl">employees</span> (department, salary);`
+      },
+      {
+        title: "Index का use check",
+        desc: "Query execution plan देखो",
+        code: `<span class="kw">EXPLAIN</span> <span class="kw">SELECT</span> * <span class="kw">FROM</span> <span class="tbl">students</span>
+<span class="kw">WHERE</span> name = <span class="str">'Rahul'</span>;`
+      }
+    ],
+    questions: [
+      { q: "Index का मुख्य फायदा क्या है?", options: ["Storage save होती है", "Data retrieval (SELECT) fast होता है", "Data insert fast होता है", "Memory कम लगती है"], correct: 1, exp: "Index से WHERE clause में data ढूंढना बहुत fast हो जाता है। Full table scan की जगह index scan होता है।" },
+      { q: "Index का नुकसान क्या है?", options: ["SELECT slow होता है", "INSERT/UPDATE/DELETE slow हो सकते हैं और extra space", "NULL values नहीं होती", "Joins नहीं होते"], correct: 1, exp: "Index data write operations (INSERT, UPDATE, DELETE) को slow करता है क्योंकि index भी update होता है। Extra disk space भी लगती है।" },
+      { q: "PRIMARY KEY पर index automatically बनता है?", options: ["नहीं", "हाँ, automatically", "Manually बनाना पड़ता है", "Depends on database"], correct: 1, exp: "हाँ! जब आप PRIMARY KEY define करते हैं, database automatically उस column पर unique index बना देता है।" },
+      { q: "UNIQUE index क्या guarantee करता है?", options: ["Fast queries", "Column में duplicate values नहीं होंगी", "NULL values नहीं होंगी", "Sorted data"], correct: 1, exp: "UNIQUE index ensure करता है कि indexed column में कोई duplicate value insert नहीं हो सकती।" },
+      { q: "Composite index क्या है?", options: ["एक column पर index", "Multiple columns पर बना index", "Unique index", "Primary key index"], correct: 1, exp: "Composite index (multi-column index) दो या दो से ज्यादा columns पर एक साथ बनाया जाता है।" },
+      { q: "कितने indexes बना सकते हैं एक table पर?", options: ["सिर्फ 1", "सिर्फ 5", "Multiple indexes बन सकते हैं", "कोई नहीं"], correct: 2, exp: "एक table पर multiple indexes बनाए जा सकते हैं, लेकिन ज्यादा indexes write performance slow करते हैं।" },
+      { q: "EXPLAIN command क्या करता है?", options: ["Query execute करता है", "Query execution plan दिखाता है", "Index बनाता है", "Table structure दिखाता है"], correct: 1, exp: "EXPLAIN command बताता है कि database query को कैसे execute करेगा — index use हो रहा है या नहीं।" },
+      { q: "कौन से columns पर index बनाना ज्यादा फायदेमंद है?", options: ["All columns पर", "Columns जो WHERE, JOIN में ज्यादा use होते हैं", "Columns जो rarely use होते हैं", "BLOB columns पर"], correct: 1, exp: "WHERE clause, JOIN conditions, और ORDER BY में जो columns ज्यादा use होते हैं, उन पर index बनाने से सबसे ज्यादा performance benefit होता है।" },
+      { q: "Full table scan कब होता है?", options: ["Index होने पर", "Index न हो या index use न हो", "JOIN होने पर", "ORDER BY होने पर"], correct: 1, exp: "जब कोई index available न हो या query optimizer index use न करे, तब database पूरी table की हर row check करता है।" },
+      { q: "DROP INDEX से क्या होता है?", options: ["Table delete होती है", "Index delete होता है, table safe रहती है", "Data delete होता है", "Error आता है"], correct: 1, exp: "DROP INDEX सिर्फ index को delete करता है। Table और उसका data बिल्कुल safe रहता है।" }
+    ]
+  },
+  {
+    id: 9,
+    name: "Views",
+    tag: "ADVANCED",
+    definition: "View एक virtual table है जो एक SELECT query पर based होती है। View में खुद कोई data store नहीं होता — यह original table(s) का data show करती है। Views queries को simplify करते हैं, security provide करते हैं, और complex logic hide करते हैं।",
+    syntax: `<span class="cm">-- View बनाओ</span>
+<span class="kw">CREATE VIEW</span> view_name <span class="kw">AS</span>
+<span class="kw">SELECT</span> col1, col2
+<span class="kw">FROM</span> table_name
+<span class="kw">WHERE</span> condition;
+
+<span class="cm">-- View use करो</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> view_name;
+
+<span class="cm">-- View delete करो</span>
+<span class="kw">DROP VIEW</span> view_name;`,
+    examples: [
+      {
+        title: "Simple View",
+        desc: "Active employees की view",
+        code: `<span class="kw">CREATE VIEW</span> active_employees <span class="kw">AS</span>
+<span class="kw">SELECT</span> id, name, salary
+<span class="kw">FROM</span> <span class="tbl">employees</span>
+<span class="kw">WHERE</span> status = <span class="str">'active'</span>;`
+      },
+      {
+        title: "View with JOIN",
+        desc: "Complex query को view में hide करो",
+        code: `<span class="kw">CREATE VIEW</span> student_marks <span class="kw">AS</span>
+<span class="kw">SELECT</span> s.name, m.score
+<span class="kw">FROM</span> <span class="tbl">students</span> s
+<span class="kw">JOIN</span> <span class="tbl">marks</span> m <span class="kw">ON</span> s.id = m.sid;`
+      },
+      {
+        title: "View use करना",
+        desc: "View को normal table की तरह use करो",
+        code: `<span class="kw">SELECT</span> * <span class="kw">FROM</span> student_marks
+<span class="kw">WHERE</span> score > <span class="num">80</span>
+<span class="kw">ORDER BY</span> score <span class="kw">DESC</span>;`
+      }
+    ],
+    questions: [
+      { q: "View क्या है?", options: ["Physical table", "Stored procedure", "SELECT query पर based virtual table", "Index का type"], correct: 2, exp: "View एक virtual table है — यह एक saved SELECT query है। Data physically store नहीं होता।" },
+      { q: "View में data कहाँ store होता है?", options: ["View में physically", "Original table(s) में", "Memory में", "Hard disk में अलग"], correct: 1, exp: "View खुद कोई data store नहीं करती। जब View query होती है, underlying table(s) से real-time data आता है।" },
+      { q: "Views किस काम आती हैं?", options: ["Data store करने के लिए", "Query simplification और security के लिए", "Performance improve करने के लिए", "Index बनाने के लिए"], correct: 1, exp: "Views complex queries को simple बनाती हैं, sensitive columns hide करके security देती हैं, और reusable query logic provide करती हैं।" },
+      { q: "View को update करना क्या updatable view कहलाता है?", options: ["हाँ, सभी views updatable हैं", "नहीं, views update नहीं होती", "कुछ simple views updatable होती हैं", "Views हमेशा read-only हैं"], correct: 2, exp: "Simple views (single table, no GROUP BY, no DISTINCT, no aggregate) updatable हो सकती हैं। Complex views generally read-only होती हैं।" },
+      { q: "DROP VIEW view_name; क्या करेगा?", options: ["Original table delete होगी", "View delete होगी, table safe रहेगी", "Data delete होगा", "Error आएगा"], correct: 1, exp: "DROP VIEW सिर्फ view को delete करता है। Underlying table और data बिल्कुल safe रहते हैं।" },
+      { q: "CREATE OR REPLACE VIEW का क्या फायदा है?", options: ["New view बनाता है", "Existing view को modify करता है (already exist करे तो replace)", "View delete करता है", "View rename करता है"], correct: 1, exp: "CREATE OR REPLACE VIEW से अगर view already exist करती है तो replace होगी, नहीं तो नई बनेगी।" },
+      { q: "Security के लिए View कैसे use होती है?", options: ["Data encrypt करती है", "Sensitive columns छुपाकर limited access देती है", "Password protect करती है", "Backup बनाती है"], correct: 1, exp: "View में सिर्फ allowed columns include करके users को limited data access दे सकते हैं — sensitive columns hidden रहते हैं।" },
+      { q: "View पर भी WHERE clause use कर सकते हैं?", options: ["नहीं", "हाँ, normal table जैसे", "सिर्फ SELECT के साथ", "सिर्फ JOIN के साथ"], correct: 1, exp: "हाँ! View को normal table की तरह use करते हैं। SELECT * FROM my_view WHERE condition; — बिल्कुल काम करेगा।" },
+      { q: "Materialized View और Normal View में फर्क?", options: ["कोई फर्क नहीं", "Materialized View data physically store करती है, Normal View नहीं", "Normal View faster है", "Materialized View छोटी होती है"], correct: 1, exp: "Materialized View data को physically cache/store करती है (faster reads), Normal View हर बार query execute करती है।" },
+      { q: "एक View में दूसरी View use कर सकते हैं?", options: ["नहीं", "हाँ, views nested हो सकती हैं", "सिर्फ 2 levels तक", "Error आएगा"], correct: 1, exp: "हाँ! एक view में दूसरी view को reference कर सकते हैं — nested views।" }
+    ]
+  },
+  {
+    id: 10,
+    name: "Transactions & ACID",
+    tag: "ADVANCED",
+    definition: "Transaction SQL operations का एक group है जो या तो पूरा complete होता है या पूरा rollback होता है। ACID properties: Atomicity (सब या कुछ नहीं), Consistency (rules maintain), Isolation (transactions अलग-अलग), Durability (committed data permanent)।",
+    syntax: `<span class="kw">BEGIN TRANSACTION</span>;  <span class="cm">-- या START TRANSACTION;</span>
+
+<span class="kw">UPDATE</span> <span class="tbl">accounts</span> <span class="kw">SET</span> balance = balance - <span class="num">1000</span>
+<span class="kw">WHERE</span> id = <span class="num">1</span>;
+
+<span class="kw">UPDATE</span> <span class="tbl">accounts</span> <span class="kw">SET</span> balance = balance + <span class="num">1000</span>
+<span class="kw">WHERE</span> id = <span class="num">2</span>;
+
+<span class="kw">COMMIT</span>;    <span class="cm">-- सफल हुआ तो save</span>
+<span class="cm">-- या ROLLBACK;  -- कुछ गलत हुआ तो undo</span>`,
+    examples: [
+      {
+        title: "Bank Transfer Transaction",
+        desc: "पैसे transfer — दोनों operations एक साथ",
+        code: `<span class="kw">START TRANSACTION</span>;
+<span class="kw">UPDATE</span> <span class="tbl">accounts</span>
+  <span class="kw">SET</span> bal = bal - <span class="num">500</span> <span class="kw">WHERE</span> id = <span class="num">1</span>;
+<span class="kw">UPDATE</span> <span class="tbl">accounts</span>
+  <span class="kw">SET</span> bal = bal + <span class="num">500</span> <span class="kw">WHERE</span> id = <span class="num">2</span>;
+<span class="kw">COMMIT</span>;`
+      },
+      {
+        title: "ROLLBACK example",
+        desc: "Error पर undo करो",
+        code: `<span class="kw">START TRANSACTION</span>;
+<span class="kw">DELETE FROM</span> <span class="tbl">orders</span> <span class="kw">WHERE</span> id = <span class="num">5</span>;
+<span class="cm">-- कुछ गलत हुआ...</span>
+<span class="kw">ROLLBACK</span>;  <span class="cm">-- delete undo!</span>`
+      },
+      {
+        title: "SAVEPOINT",
+        desc: "Transaction में checkpoint",
+        code: `<span class="kw">START TRANSACTION</span>;
+<span class="kw">INSERT INTO</span> <span class="tbl">orders</span> <span class="kw">VALUES</span> (<span class="num">1</span>, <span class="str">'A'</span>);
+<span class="kw">SAVEPOINT</span> sp1;
+<span class="kw">INSERT INTO</span> <span class="tbl">orders</span> <span class="kw">VALUES</span> (<span class="num">2</span>, <span class="str">'B'</span>);
+<span class="kw">ROLLBACK TO</span> sp1; <span class="cm">-- सिर्फ 2nd insert undo</span>
+<span class="kw">COMMIT</span>;`
+      }
+    ],
+    questions: [
+      { q: "Transaction का मुख्य purpose क्या है?", options: ["Data fast insert करना", "Multiple operations को safely एक unit में execute करना", "Table create करना", "Index manage करना"], correct: 1, exp: "Transaction multiple SQL operations को एक logical unit बनाता है — सब complete होते हैं या सब fail होते हैं।" },
+      { q: "ACID में A का मतलब?", options: ["Authorization", "Availability", "Atomicity", "Aggregation"], correct: 2, exp: "A = Atomicity — Transaction के सभी operations पूरे होंगे या एक भी नहीं। 'All or Nothing'।" },
+      { q: "COMMIT का काम क्या है?", options: ["Transaction शुरू करना", "Transaction के changes permanently save करना", "Transaction undo करना", "Table lock करना"], correct: 1, exp: "COMMIT transaction के सभी changes को permanently database में save करता है।" },
+      { q: "ROLLBACK क्या करता है?", options: ["Changes save करता है", "Transaction के uncommitted changes undo करता है", "New transaction शुरू करता है", "Data delete करता है"], correct: 1, exp: "ROLLBACK transaction के सभी uncommitted changes को undo करके database को previous state में ले जाता है।" },
+      { q: "ACID में I (Isolation) का मतलब?", options: ["एक transaction दूसरे को affect नहीं करता", "Data permanent रहता है", "Rules maintain होते हैं", "All or nothing"], correct: 0, exp: "Isolation = concurrent transactions एक दूसरे से isolated रहते हैं। एक transaction के changes दूसरे को तब तक नहीं दिखते जब तक commit न हो।" },
+      { q: "Durability का क्या मतलब है?", options: ["Transaction fast है", "Committed data permanent रहता है, crash के बाद भी", "Data duplicate नहीं होता", "Fast recovery"], correct: 1, exp: "Durability = COMMIT के बाद data permanent है। System crash के बाद भी data safe रहेगा।" },
+      { q: "Bank transfer में Transaction क्यों जरूरी है?", options: ["Performance के लिए", "Debit और Credit दोनों एक साथ होने चाहिए या कोई नहीं", "Security के लिए", "Speed के लिए"], correct: 1, exp: "अगर debit हो जाए और credit fail हो, तो पैसे गायब हो जाएंगे। Transaction ensure करता है — दोनों होंगे या कोई नहीं।" },
+      { q: "SAVEPOINT क्या करता है?", options: ["Transaction save करता है", "Transaction के अंदर checkpoint बनाता है", "Commit करता है", "Rollback करता है"], correct: 1, exp: "SAVEPOINT transaction के बीच में एक checkpoint बनाता है। ROLLBACK TO savepoint से सिर्फ उस point तक undo होता है।" },
+      { q: "Consistency (ACID में C) का मतलब?", options: ["Data fast है", "Transaction के बाद database valid state में रहता है", "Data duplicate नहीं होता", "Data secure है"], correct: 1, exp: "Consistency = Transaction complete होने के बाद database सभी defined rules/constraints को satisfy करता है।" },
+      { q: "AUTO-COMMIT क्या है?", options: ["Automatic backup", "हर statement automatically commit होता है", "Automatic rollback", "Automatic transaction start"], correct: 1, exp: "AUTO-COMMIT mode में हर SQL statement automatically commit हो जाता है। BEGIN TRANSACTION से इसे disable करते हैं।" }
+    ]
+  }
+];
+
+// State
+let currentTopic = 0;
+let currentTab = 'learn';
+let answers = {};
+let scores = {};
+
+function init() {
+  renderSidebar();
+  renderContent(0);
+  updateProgress();
+}
+
+function renderSidebar() {
+  const list = document.getElementById('topicList');
+  list.innerHTML = topics.map(t => `
+    <button class="topic-btn ${t.id === currentTopic ? 'active' : ''} ${scores[t.id] !== undefined ? 'done' : ''}" 
+      onclick="switchTopic(${t.id})">
+      <span class="topic-num">${String(t.id + 1).padStart(2,'0')}</span>
+      ${t.name}
+    </button>
+  `).join('');
+}
+
+function switchTopic(id) {
+  currentTopic = id;
+  currentTab = 'learn';
+  renderSidebar();
+  renderContent(id);
+  document.querySelector('.main').scrollTop = 0;
+}
+
+function switchTab(tab, btn) {
+  currentTab = tab;
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-' + tab).classList.add('active');
+}
+
+function renderContent(id) {
+  const t = topics[id];
+  const main = document.getElementById('mainContent');
+  
+  const questionsHTML = t.questions.map((q, qi) => {
+    const key = `${id}_${qi}`;
+    const ans = answers[key];
+    let cardClass = '';
+    if (ans !== undefined) cardClass = ans === q.correct ? 'answered-correct' : 'answered-wrong';
+    
+    return `
+    <div class="q-card ${cardClass}" id="qcard_${key}">
+      <div class="q-num">Q${qi + 1} / ${t.questions.length}</div>
+      <div class="q-text">${q.q}</div>
+      <div class="q-options">
+        ${q.options.map((opt, oi) => {
+          let cls = '';
+          if (ans !== undefined) {
+            if (oi === q.correct) cls = 'correct';
+            else if (oi === ans && ans !== q.correct) cls = 'wrong';
+          }
+          return `<button class="opt-btn ${cls}" 
+            onclick="answer(${id}, ${qi}, ${oi})" 
+            ${ans !== undefined ? 'disabled' : ''}>
+            ${String.fromCharCode(65+oi)}. ${opt}
+          </button>`;
+        }).join('')}
+      </div>
+      <div class="q-explanation ${ans !== undefined ? 'show' : ''}" id="exp_${key}">
+        <div class="exp-label">💡 Explanation</div>
+        ${q.exp}
+      </div>
+    </div>`;
+  }).join('');
+
+  const score = scores[id];
+  const scoreHTML = score !== undefined ? `${score}/${t.questions.length}` : '0/0';
+  
+  main.innerHTML = `
+    <div class="topic-header">
+      <div class="topic-tag">${t.tag}</div>
+      <div class="topic-title"><span>#${id+1}</span> ${t.name}</div>
+    </div>
+
+    <div class="tabs">
+      <button class="tab-btn ${currentTab === 'learn' ? 'active' : ''}" onclick="switchTab('learn', this)">📖 सीखो</button>
+      <button class="tab-btn ${currentTab === 'practice' ? 'active' : ''}" onclick="switchTab('practice', this)">🎯 Practice</button>
+    </div>
+
+    <div id="panel-learn" class="panel ${currentTab === 'learn' ? 'active' : ''}">
+      <div class="def-card">
+        <h3>📌 Definition</h3>
+        <p>${t.definition}</p>
+      </div>
+
+      <div class="def-card">
+        <h3>⚙️ Syntax</h3>
+        <div class="code-block">${t.syntax}</div>
+      </div>
+
+      <div class="def-card" style="border-top: 2px solid var(--accent3);">
+        <h3 style="color:var(--accent3)">💡 Examples (${t.examples.length})</h3>
+        <div class="examples-grid">
+          ${t.examples.map((ex, i) => `
+            <div class="example-card">
+              <div class="example-num">EXAMPLE ${i+1}</div>
+              <div class="example-title">${ex.title}</div>
+              <div class="example-desc">${ex.desc}</div>
+              <div class="code-block">${ex.code}</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    </div>
+
+    <div id="panel-practice" class="panel ${currentTab === 'practice' ? 'active' : ''}">
+      <div class="practice-header">
+        <div class="practice-title">🎯 Practice Questions</div>
+        <div class="score-badge" id="scoreDisplay_${id}">
+          Score: ${scoreHTML}
+        </div>
+      </div>
+      ${questionsHTML}
+      <button class="reset-btn" onclick="resetTopic(${id})">🔄 Reset Questions</button>
+    </div>
+
+    <div style="display:flex; justify-content:space-between; margin-top:32px; gap:12px; flex-wrap:wrap; padding-bottom:40px;">
+      ${id > 0 ? `<button onclick="switchTopic(${id-1})" style="padding:12px 22px; background:var(--card); border:2px solid var(--border); border-radius:10px; color:var(--text); cursor:pointer; font-family:'Sora',sans-serif; font-size:13px; font-weight:600;" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text)'">← ${topics[id-1].name}</button>` : '<div></div>'}
+      ${id < topics.length-1 ? `<button onclick="switchTopic(${id+1})" style="padding:12px 22px; background:linear-gradient(135deg,var(--accent2),var(--accent)); border:none; border-radius:10px; color:white; cursor:pointer; font-family:'Sora',sans-serif; font-size:13px; font-weight:700;">Agla Topic: ${topics[id+1].name} →</button>` : '<div style="padding:12px 20px;color:var(--accent3);font-weight:700;font-size:15px;">🎉 Saare Topics Complete!</div>'}
+    </div>
+  `;
+}
+
+function answer(topicId, qIdx, optIdx) {
+  const key = `${topicId}_${qIdx}`;
+  if (answers[key] !== undefined) return;
+  
+  answers[key] = optIdx;
+  const q = topics[topicId].questions[qIdx];
+  const isCorrect = optIdx === q.correct;
+  
+  // Update card
+  const card = document.getElementById(`qcard_${key}`);
+  card.classList.add(isCorrect ? 'answered-correct' : 'answered-wrong');
+  
+  // Update buttons
+  card.querySelectorAll('.opt-btn').forEach((btn, i) => {
+    btn.disabled = true;
+    if (i === q.correct) btn.classList.add('correct');
+    else if (i === optIdx && !isCorrect) btn.classList.add('wrong');
+  });
+  
+  // Show explanation
+  document.getElementById(`exp_${key}`).classList.add('show');
+  
+  // Update score
+  updateScore(topicId);
+  updateProgress();
+}
+
+function updateScore(topicId) {
+  const t = topics[topicId];
+  let correct = 0;
+  t.questions.forEach((q, qi) => {
+    const key = `${topicId}_${qi}`;
+    if (answers[key] === q.correct) correct++;
+  });
+  scores[topicId] = correct;
+  const el = document.getElementById(`scoreDisplay_${topicId}`);
+  if (el) el.textContent = `Score: ${correct}/${t.questions.length}`;
+  renderSidebar();
+}
+
+function resetTopic(topicId) {
+  const t = topics[topicId];
+  t.questions.forEach((q, qi) => {
+    delete answers[`${topicId}_${qi}`];
+  });
+  delete scores[topicId];
+  renderContent(topicId);
+  updateProgress();
+  renderSidebar();
+}
+
+function updateProgress() {
+  const completed = Object.keys(scores).length;
+  const total = topics.length;
+  document.getElementById('progressText').textContent = `${completed} / ${total}`;
+  document.getElementById('progressFill').style.width = `${(completed/total)*100}%`;
+}
+
+init();
+</script>
+</body>
+</html>
